@@ -11,9 +11,12 @@ const progressContainer = document.getElementById("progressContainer");
 const progressFill = document.getElementById("progressFill");
 const progressText = document.getElementById("progressText");
 const statusMessage = document.getElementById("statusMessage");
+const dragDropZone = document.getElementById("dragDropZone");
+const droppedFiles = document.getElementById("droppedFiles");
 
 // State
 let isProcessing = false;
+let selectedFiles = [];
 
 // Event listeners
 browseSrcBtn.addEventListener("click", async () => {
@@ -49,9 +52,12 @@ imageForm.addEventListener("submit", async (e) => {
 
   if (isProcessing) return;
 
-  // Validate form
-  if (!sourceFolder.value.trim()) {
-    showError("Please select a source folder");
+  // Check if we have files or folder
+  const hasFiles = selectedFiles.length > 0;
+  const hasFolder = sourceFolder.value.trim();
+
+  if (!hasFiles && !hasFolder) {
+    showError("Please select a source folder or drag and drop some images");
     return;
   }
 
@@ -60,7 +66,7 @@ imageForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  if (sourceFolder.value === destFolder.value) {
+  if (hasFolder && sourceFolder.value === destFolder.value) {
     showError("Source and destination folders cannot be the same");
     return;
   }
@@ -83,10 +89,11 @@ async function startProcessing() {
 
   try {
     const options = {
-      sourcePath: sourceFolder.value,
+      sourcePath: sourceFolder.value || null,
       destinationPath: destFolder.value,
       targetFormat: targetFormat.value,
       maxSizeKB: parseInt(maxSize.value),
+      files: selectedFiles.length > 0 ? selectedFiles.map((f) => f.path) : null,
     };
 
     // Set up progress listener
@@ -201,4 +208,189 @@ document.addEventListener("DOMContentLoaded", () => {
   [sourceFolder, destFolder, targetFormat, maxSize].forEach((element) => {
     element.addEventListener("change", hideStatusMessage);
   });
+
+  // Initialize drag and drop
+  setupDragAndDrop();
 });
+
+// Drag and Drop functionality
+function setupDragAndDrop() {
+  // Prevent default drag behaviors
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+    dragDropZone.addEventListener(eventName, preventDefaults, false);
+    document.body.addEventListener(eventName, preventDefaults, false);
+  });
+
+  // Highlight drop zone when item is dragged over it
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dragDropZone.addEventListener(eventName, highlight, false);
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    dragDropZone.addEventListener(eventName, unhighlight, false);
+  });
+
+  // Handle dropped files
+  dragDropZone.addEventListener("drop", handleDrop, false);
+
+  // Click to select files
+  dragDropZone.addEventListener("click", () => {
+    if (selectedFiles.length === 0) {
+      selectFiles();
+    }
+  });
+}
+
+function preventDefaults(e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+function highlight(e) {
+  dragDropZone.classList.add("drag-over");
+}
+
+function unhighlight(e) {
+  dragDropZone.classList.remove("drag-over");
+}
+
+function handleDrop(e) {
+  const dt = e.dataTransfer;
+  const files = dt.files;
+  handleFiles(files);
+}
+
+async function selectFiles() {
+  try {
+    const files = await window.electronAPI.selectFiles();
+    if (files && files.length > 0) {
+      handleFiles(files);
+    }
+  } catch (error) {
+    showError("Error selecting files: " + error.message);
+  }
+}
+
+async function handleFiles(files) {
+  const imageFiles = Array.from(files).filter((file) => {
+    const validTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/avif",
+      "image/tiff",
+      "image/bmp",
+      "image/gif",
+    ];
+    return (
+      validTypes.includes(file.type) ||
+      /\.(jpg|jpeg|png|webp|avif|tiff|tif|bmp|gif)$/i.test(file.name)
+    );
+  });
+
+  if (imageFiles.length === 0) {
+    showError("No valid image files found. Please select image files.");
+    return;
+  }
+
+  // Add new files to selectedFiles array
+  for (const file of imageFiles) {
+    const filePath = file.path || file.webkitRelativePath || file.name;
+
+    // Check if file already exists
+    const exists = selectedFiles.some((f) => f.path === filePath);
+    if (!exists) {
+      const fileObj = {
+        name: file.name,
+        size: file.size || 0, // Use File API size first
+        path: filePath,
+        type: file.type,
+      };
+
+      selectedFiles.push(fileObj);
+    }
+  }
+
+  // If we have file paths (not just names), get actual file sizes
+  const filePaths = selectedFiles
+    .filter((f) => f.size === 0 && f.path && f.path !== f.name)
+    .map((f) => f.path);
+
+  if (filePaths.length > 0) {
+    try {
+      const fileStats = await window.electronAPI.getFileStats(filePaths);
+      fileStats.forEach((stat) => {
+        const fileIndex = selectedFiles.findIndex((f) => f.path === stat.path);
+        if (fileIndex !== -1) {
+          selectedFiles[fileIndex].size = stat.size;
+        }
+      });
+    } catch (error) {
+      console.error("Error getting file sizes:", error);
+    }
+  }
+
+  updateFilesList();
+  clearSourceFolder();
+  hideStatusMessage();
+}
+
+function updateFilesList() {
+  if (selectedFiles.length === 0) {
+    dragDropZone.classList.remove("has-files");
+    droppedFiles.innerHTML = "";
+    return;
+  }
+
+  dragDropZone.classList.add("has-files");
+
+  const filesHtml = `
+    <div class="files-header">
+      <span class="files-count">${selectedFiles.length} file${
+    selectedFiles.length > 1 ? "s" : ""
+  } selected</span>
+      <span class="clear-all" onclick="clearAllFiles()">Clear All</span>
+    </div>
+    ${selectedFiles
+      .map(
+        (file, index) => `
+      <div class="file-item">
+        <span class="file-name" title="${file.name}">${file.name}</span>
+        <span class="file-size">${formatFileSize(file.size)}</span>
+        <span class="remove-file" onclick="removeFile(${index})">×</span>
+      </div>
+    `
+      )
+      .join("")}
+  `;
+
+  droppedFiles.innerHTML = filesHtml;
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
+function removeFile(index) {
+  selectedFiles.splice(index, 1);
+  updateFilesList();
+}
+
+function clearAllFiles() {
+  selectedFiles = [];
+  updateFilesList();
+}
+
+function clearSourceFolder() {
+  sourceFolder.value = "";
+  sourceFolder.classList.remove("selected");
+}
+
+// Make functions global for onclick handlers
+window.removeFile = removeFile;
+window.clearAllFiles = clearAllFiles;

@@ -4,6 +4,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld("electronAPI", {
   selectFolder: (title) => ipcRenderer.invoke("select-folder", title),
+  selectFiles: () => ipcRenderer.invoke("select-files"),
+  getFileStats: (filePaths) => ipcRenderer.invoke("get-file-stats", filePaths),
   processImages: (options) => ipcRenderer.invoke("process-images", options),
   showErrorDialog: (title, content) =>
     ipcRenderer.invoke("show-error-dialog", title, content),

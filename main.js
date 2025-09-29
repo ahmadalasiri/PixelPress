@@ -18,9 +18,15 @@ function createWindow() {
     resizable: true,
     minWidth: 600,
     minHeight: 500,
+    show: false, // Don't show until ready
   });
 
   mainWindow.loadFile("index.html");
+
+  // Show window when ready to prevent flash
+  mainWindow.once("ready-to-show", () => {
+    mainWindow.show();
+  });
 
   // Open DevTools in development
   if (process.argv.includes("--dev")) {
@@ -28,7 +34,12 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow);
+// Disable hardware acceleration to prevent GPU errors (optional)
+app.disableHardwareAcceleration();
+
+app.whenReady().then(() => {
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -55,18 +66,98 @@ ipcMain.handle("select-folder", async (event, title = "Select Folder") => {
   return null;
 });
 
+ipcMain.handle("select-files", async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: "Select Image Files",
+    properties: ["openFile", "multiSelections"],
+    filters: [
+      {
+        name: "Images",
+        extensions: [
+          "jpg",
+          "jpeg",
+          "png",
+          "webp",
+          "avif",
+          "tiff",
+          "tif",
+          "bmp",
+          "gif",
+        ],
+      },
+    ],
+  });
+
+  if (!result.canceled && result.filePaths.length > 0) {
+    const filesWithStats = await Promise.all(
+      result.filePaths.map(async (filePath) => {
+        try {
+          const stats = await fs.stat(filePath);
+          return {
+            name: path.basename(filePath),
+            path: filePath,
+            size: stats.size,
+            type: `image/${path.extname(filePath).substring(1)}`,
+          };
+        } catch (error) {
+          return {
+            name: path.basename(filePath),
+            path: filePath,
+            size: 0,
+            type: `image/${path.extname(filePath).substring(1)}`,
+          };
+        }
+      })
+    );
+    return filesWithStats;
+  }
+  return null;
+});
+
+ipcMain.handle("get-file-stats", async (event, filePaths) => {
+  try {
+    const filesWithStats = await Promise.all(
+      filePaths.map(async (filePath) => {
+        try {
+          const stats = await fs.stat(filePath);
+          return {
+            path: filePath,
+            size: stats.size,
+          };
+        } catch (error) {
+          return {
+            path: filePath,
+            size: 0,
+          };
+        }
+      })
+    );
+    return filesWithStats;
+  } catch (error) {
+    console.error("Error getting file stats:", error);
+    return [];
+  }
+});
+
 ipcMain.handle("process-images", async (event, options) => {
   try {
-    const { sourcePath, destinationPath, targetFormat, maxSizeKB } = options;
+    const { sourcePath, destinationPath, targetFormat, maxSizeKB, files } =
+      options;
 
-    // Validate paths exist
+    // Validate destination path exists
     try {
-      await fs.access(sourcePath);
       await fs.access(destinationPath);
     } catch (error) {
-      throw new Error(
-        "Source or destination folder does not exist or is not accessible"
-      );
+      throw new Error("Destination folder does not exist or is not accessible");
+    }
+
+    // Validate source path if provided
+    if (sourcePath) {
+      try {
+        await fs.access(sourcePath);
+      } catch (error) {
+        throw new Error("Source folder does not exist or is not accessible");
+      }
     }
 
     // Start processing with progress updates
@@ -78,7 +169,8 @@ ipcMain.handle("process-images", async (event, options) => {
       (progress) => {
         // Send progress updates to renderer
         mainWindow.webContents.send("processing-progress", progress);
-      }
+      },
+      files
     );
 
     return result;

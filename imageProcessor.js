@@ -227,12 +227,13 @@ async function processImage(inputPath, outputPath, targetFormat, maxSizeKB) {
 }
 
 /**
- * Main function to process all images in a directory
- * @param {string} sourcePath - Source directory path
+ * Main function to process all images in a directory or specific files
+ * @param {string} sourcePath - Source directory path (optional if files provided)
  * @param {string} destinationPath - Destination directory path
  * @param {string} targetFormat - Target format (webp, avif, jpeg, png)
  * @param {number} maxSizeKB - Maximum file size in KB
  * @param {Function} progressCallback - Progress callback function
+ * @param {Array} files - Array of specific file paths to process (optional)
  * @returns {Promise<Object>} Processing results
  */
 async function processImages(
@@ -240,12 +241,17 @@ async function processImages(
   destinationPath,
   targetFormat,
   maxSizeKB,
-  progressCallback
+  progressCallback,
+  files = null
 ) {
   try {
     // Validate inputs
-    if (!sourcePath || !destinationPath) {
-      throw new Error("Source and destination paths are required");
+    if (!destinationPath) {
+      throw new Error("Destination path is required");
+    }
+
+    if (!sourcePath && !files) {
+      throw new Error("Either source path or files array is required");
     }
 
     if (!SUPPORTED_EXTENSIONS.includes(`.${targetFormat}`)) {
@@ -256,20 +262,34 @@ async function processImages(
       throw new Error("Maximum size must be between 10 and 10000 KB");
     }
 
-    // Scan for image files
-    progressCallback({ current: 0, total: 0, stage: "scanning" });
+    // Get image files list
+    let imageFiles = [];
 
-    const imageFiles = await getImageFiles(sourcePath);
+    if (files && files.length > 0) {
+      // Use provided files
+      imageFiles = files;
+      progressCallback({
+        current: files.length,
+        total: files.length,
+        stage: "scanning",
+      });
+    } else {
+      // Scan directory for image files
+      progressCallback({ current: 0, total: 0, stage: "scanning" });
+      imageFiles = await getImageFiles(sourcePath);
 
-    if (imageFiles.length === 0) {
-      throw new Error("No supported image files found in the source directory");
+      if (imageFiles.length === 0) {
+        throw new Error(
+          "No supported image files found in the source directory"
+        );
+      }
+
+      progressCallback({
+        current: imageFiles.length,
+        total: imageFiles.length,
+        stage: "scanning",
+      });
     }
-
-    progressCallback({
-      current: imageFiles.length,
-      total: imageFiles.length,
-      stage: "scanning",
-    });
 
     // Process each image
     let processedCount = 0;
@@ -277,16 +297,20 @@ async function processImages(
 
     for (let i = 0; i < imageFiles.length; i++) {
       const inputPath = imageFiles[i];
-      const relativePath = getRelativePath(inputPath, sourcePath);
+      let outputPath;
 
-      // Change extension to target format
-      const parsedPath = path.parse(relativePath);
-      const outputFileName = `${parsedPath.name}.${targetFormat}`;
-      const outputPath = path.join(
-        destinationPath,
-        parsedPath.dir,
-        outputFileName
-      );
+      if (files && files.length > 0) {
+        // For individual files, save directly to destination folder
+        const fileName = path.basename(inputPath, path.extname(inputPath));
+        const outputFileName = `${fileName}.${targetFormat}`;
+        outputPath = path.join(destinationPath, outputFileName);
+      } else {
+        // For folder processing, maintain directory structure
+        const relativePath = getRelativePath(inputPath, sourcePath);
+        const parsedPath = path.parse(relativePath);
+        const outputFileName = `${parsedPath.name}.${targetFormat}`;
+        outputPath = path.join(destinationPath, parsedPath.dir, outputFileName);
+      }
 
       progressCallback({
         current: i + 1,

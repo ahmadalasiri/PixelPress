@@ -257,6 +257,285 @@
         .not-processing .spinner {
             display: none;
         }
+
+        /* Drag and Drop Styles */
+        .drag-drop-zone {
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 32px;
+            background: #f7fafc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .drag-drop-zone:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+
+        .drag-drop-zone.drag-over {
+            border-color: #667eea;
+            background: #e6fffa;
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .drag-drop-content h3 {
+            color: #2d3748;
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .drag-drop-content p {
+            color: #718096;
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .drag-drop-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+
+        .drag-drop-or {
+            color: #a0aec0;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin: 16px 0;
+        }
+
+        .dropped-files {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .file-item .file-name {
+            color: #2d3748;
+            font-weight: 500;
+            flex: 1;
+            margin-right: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-item .file-size {
+            color: #718096;
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+
+        .file-item .remove-file {
+            color: #e53e3e;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .file-item .remove-file:hover {
+            background: #fed7d7;
+        }
+
+        .drag-drop-zone.has-files {
+            border-color: #38b2ac;
+            background: #e6fffa;
+        }
+
+        .drag-drop-zone.has-files .drag-drop-content {
+            display: none;
+        }
+
+        .files-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .files-count {
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .clear-all {
+            color: #e53e3e;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .clear-all:hover {
+            background: #fed7d7;
+        }
+
+        /* Summary Report Styles */
+        .summary-report {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .summary-report.visible {
+            display: block;
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .summary-title {
+            color: #2d3748;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .summary-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #718096;
+            font-weight: 600;
+        }
+
+        .file-results {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .result-item.success {
+            border-left: 4px solid #38a169;
+        }
+
+        .result-item.skipped {
+            border-left: 4px solid #ed8936;
+            opacity: 0.7;
+        }
+
+        .result-filename {
+            font-weight: 600;
+            color: #2d3748;
+            flex: 1;
+            margin-right: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .result-sizes {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .size-before {
+            color: #e53e3e;
+            font-weight: 600;
+        }
+
+        .size-arrow {
+            color: #718096;
+        }
+
+        .size-after {
+            color: #38a169;
+            font-weight: 600;
+        }
+
+        .compression-percent {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
+
+        .compression-percent.high {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .compression-percent.medium {
+            background: #faf089;
+            color: #744210;
+        }
+
+        .compression-percent.low {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .skipped-reason {
+            color: #d69e2e;
+            font-style: italic;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 
@@ -268,6 +547,16 @@
         </div>
 
         <form id="imageForm">
+            <!-- Drag and Drop Zone -->
+            <div class="drag-drop-zone" id="dragDropZone">
+                <div class="drag-drop-content">
+                    <div class="drag-drop-icon">📁</div>
+                    <h3>Drag & Drop Images Here</h3>
+                    <div class="drag-drop-or">— OR —</div>
+                </div>
+                <div class="dropped-files" id="droppedFiles"></div>
+            </div>
+
             <div class="form-group">
                 <label for="sourceFolder">Source Folder</label>
                 <div class="folder-input">
@@ -321,6 +610,29 @@
         </div>
 
         <div class="status-message" id="statusMessage"></div>
+
+        <div class="summary-report" id="summaryReport">
+            <div class="summary-header">
+                <div class="summary-title">📊 Compression Summary</div>
+            </div>
+            
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalProcessed">0</div>
+                    <div class="stat-label">Processed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalSaved">0 MB</div>
+                    <div class="stat-label">Space Saved</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="avgCompression">0%</div>
+                    <div class="stat-label">Avg Compression</div>
+                </div>
+            </div>
+
+            <div class="file-results" id="fileResults"></div>
+        </div>
     </div>
 
     <script src="renderer.js"></script>
