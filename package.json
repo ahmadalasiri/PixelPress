@@ -6,6 +6,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
+    "watch": "nodemon --exec \"electron . --dev\" --watch . --ext js,html,css",
     "build": "electron-builder",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
@@ -24,7 +25,8 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^27.0.0",
-    "electron-builder": "^24.6.4"
+    "electron-builder": "^24.6.4",
+    "nodemon": "^3.0.1"
   },
   "dependencies": {
     "sharp": "^0.32.6"

@@ -2,7 +2,7 @@
 
 A powerful desktop application for batch image compression and format conversion built with Electron, Node.js, and Sharp.
 
-![PixelPress Screenshot](assets/screenshot.png)
+![PixelPress Screenshot](assets/icon.png)
 
 ## ✨ Features
 

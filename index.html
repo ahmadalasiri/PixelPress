@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Noto Sans Arabic', 'Arial Unicode MS', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -30,7 +30,7 @@
             width: 100%;
             max-width: 600px;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
 
         .container::before {
@@ -598,14 +598,109 @@
         .validation-message.success {
             color: #38a169;
         }
+
+        /* Language Switcher */
+        .header-top {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .language-switcher {
+            display: flex;
+            background: rgba(102, 126, 234, 0.9);
+            border-radius: 20px;
+            padding: 6px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 11;
+        }
+
+        .lang-btn {
+            padding: 10px 18px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.9);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.95rem;
+            min-width: 70px;
+            text-align: center;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lang-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .lang-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* RTL Support */
+        [dir="rtl"] {
+            text-align: right;
+        }
+
+        [dir="rtl"] .folder-input {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .input-row {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .result-sizes {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .summary-header {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .summary-stats {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .files-header {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .result-item {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .size-arrow {
+            transform: scaleX(-1);
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <div class="header">
-            <h1>PixelPress</h1>
-            <p>Compress and convert your images with ease</p>
+            <div class="header-top">
+                <div class="language-switcher">
+                    <button type="button" class="lang-btn active" data-lang="en">EN</button>
+                    <button type="button" class="lang-btn" data-lang="ar">العربية</button>
+                </div>
+            </div>
+            <h1 data-i18n="app.title">PixelPress</h1>
+            <p data-i18n="app.subtitle">Compress and convert your images with ease</p>
         </div>
 
         <form id="imageForm">
@@ -613,55 +708,60 @@
             <div class="drag-drop-zone" id="dragDropZone">
                 <div class="drag-drop-content">
                     <div class="drag-drop-icon">📁</div>
-                    <h3>Drag & Drop Images Here</h3>
-                    <div class="drag-drop-or">— OR —</div>
+                    <h3 data-i18n="dragDrop.title">Drag & Drop Images Here</h3>
+                    <div class="drag-drop-or" data-i18n="dragDrop.or">— OR —</div>
                 </div>
                 <div class="dropped-files" id="droppedFiles"></div>
             </div>
 
             <div class="form-group">
-                <label for="sourceFolder">Source Folder <span class="optional">(Optional - use drag & drop
-                        instead)</span></label>
+                <label for="sourceFolder"><span data-i18n="form.sourceFolder">Source Folder</span> <span
+                        class="optional" data-i18n="form.optional">(Optional - use drag & drop instead)</span></label>
                 <div class="folder-input">
                     <input type="text" id="sourceFolder" class="folder-path"
+                        data-i18n-placeholder="form.sourcePlaceholder"
                         placeholder="Select source folder containing images..." readonly>
-                    <button type="button" class="browse-btn" id="browseSrc">Browse</button>
+                    <button type="button" class="browse-btn" id="browseSrc" data-i18n="form.browse">Browse</button>
                 </div>
-                <div class="info-text">Choose the folder containing images you want to process</div>
+                <div class="info-text" data-i18n="form.sourceInfo">Choose the folder containing images you want to
+                    process</div>
             </div>
 
             <div class="form-group">
-                <label for="destFolder">Destination Folder <span class="required">*</span></label>
+                <label for="destFolder"><span data-i18n="form.destFolder">Destination Folder</span> <span
+                        class="required">*</span></label>
                 <div class="folder-input">
-                    <input type="text" id="destFolder" class="folder-path"
+                    <input type="text" id="destFolder" class="folder-path" data-i18n-placeholder="form.destPlaceholder"
                         placeholder="Select destination folder for processed images..." readonly required>
-                    <button type="button" class="browse-btn" id="browseDest">Browse</button>
+                    <button type="button" class="browse-btn" id="browseDest" data-i18n="form.browse">Browse</button>
                 </div>
-                <div class="info-text">Choose where to save the processed images</div>
+                <div class="info-text" data-i18n="form.destInfo">Choose where to save the processed images</div>
             </div>
 
             <div class="input-row">
                 <div class="form-group">
-                    <label for="targetFormat">Target Format <span class="required">*</span></label>
+                    <label for="targetFormat"><span data-i18n="form.targetFormat">Target Format</span> <span
+                            class="required">*</span></label>
                     <select id="targetFormat" required>
                         <option value="webp">WebP (.webp)</option>
                         <option value="avif">AVIF (.avif)</option>
                         <option value="jpeg">JPEG (.jpeg)</option>
                         <option value="png">PNG (.png)</option>
                     </select>
-                    <div class="info-text">Output image format</div>
+                    <div class="info-text" data-i18n="form.formatInfo">Output image format</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="maxSize">Max Size (KB) <span class="required">*</span></label>
+                    <label for="maxSize"><span data-i18n="form.maxSize">Max Size (KB)</span> <span
+                            class="required">*</span></label>
                     <input type="number" id="maxSize" value="500" min="10" max="10000" step="1" required>
-                    <div class="info-text">Maximum file size limit (10-10000 KB)</div>
+                    <div class="info-text" data-i18n="form.maxSizeInfo">Maximum file size limit (10-10000 KB)</div>
                 </div>
             </div>
 
             <button type="submit" class="process-btn" id="processBtn">
                 <span class="spinner"></span>
-                <span class="btn-text">Start Processing</span>
+                <span class="btn-text" data-i18n="form.startProcessing">Start Processing</span>
             </button>
         </form>
 
@@ -676,22 +776,22 @@
 
         <div class="summary-report" id="summaryReport">
             <div class="summary-header">
-                <div class="summary-title">📊 Compression Summary</div>
-                <button type="button" class="end-btn" id="endBtn">End</button>
+                <div class="summary-title" data-i18n="summary.title">📊 Compression Summary</div>
+                <button type="button" class="end-btn" id="endBtn" data-i18n="summary.end">End</button>
             </div>
 
             <div class="summary-stats">
                 <div class="stat-item">
                     <div class="stat-value" id="totalProcessed">0</div>
-                    <div class="stat-label">Processed</div>
+                    <div class="stat-label" data-i18n="summary.processed">Processed</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" id="totalSaved">0 MB</div>
-                    <div class="stat-label">Space Saved</div>
+                    <div class="stat-label" data-i18n="summary.spaceSaved">Space Saved</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" id="avgCompression">0%</div>
-                    <div class="stat-label">Avg Compression</div>
+                    <div class="stat-label" data-i18n="summary.avgCompression">Avg Compression</div>
                 </div>
             </div>
 
@@ -699,6 +799,7 @@
         </div>
     </div>
 
+    <script src="i18n.js"></script>
     <script src="renderer.js"></script>
 </body>
 

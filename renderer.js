@@ -63,23 +63,23 @@ imageForm.addEventListener("submit", async (e) => {
   const hasFolder = sourceFolder.value.trim();
 
   if (!hasFiles && !hasFolder) {
-    showError("Please select a source folder or drag and drop some images");
+    showError(window.i18n.t("messages.selectSource"));
     return;
   }
 
   if (!destFolder.value.trim()) {
-    showError("Please select a destination folder");
+    showError(window.i18n.t("messages.selectDest"));
     return;
   }
 
   if (hasFolder && sourceFolder.value === destFolder.value) {
-    showError("Source and destination folders cannot be the same");
+    showError(window.i18n.t("messages.sameFolders"));
     return;
   }
 
   const maxSizeValue = parseInt(maxSize.value);
   if (isNaN(maxSizeValue) || maxSizeValue < 10 || maxSizeValue > 10000) {
-    showError("Maximum size must be between 10 and 10000 KB");
+    showError(window.i18n.t("messages.invalidSize"));
     return;
   }
 
@@ -112,14 +112,19 @@ async function startProcessing() {
 
     // Show success message
     showSuccess(
-      `Successfully processed ${result.processedCount} images! ${result.skippedCount} files were skipped.`
+      window.i18n.t("messages.successMessage", {
+        processed: result.processedCount,
+        skipped: result.skippedCount,
+      })
     );
 
     // Show detailed summary
     showSummaryReport(result);
   } catch (error) {
     console.error("Processing error:", error);
-    showError("Processing failed: " + error.message);
+    showError(
+      window.i18n.t("messages.processingFailed", { error: error.message })
+    );
   } finally {
     isProcessing = false;
     updateProcessingState(false);
@@ -146,28 +151,33 @@ function updateProgress(progress) {
   const { current, total, currentFile, stage } = progress;
 
   let percentage = 0;
-  let text = "Preparing...";
+  let text = window.i18n.t("progress.preparing");
 
   if (total > 0) {
     percentage = Math.round((current / total) * 100);
 
     switch (stage) {
       case "scanning":
-        text = `Scanning files... Found ${current} images`;
+        text = window.i18n.t("progress.scanning", { count: current });
         break;
       case "processing":
-        text = `Processing ${current}/${total} images`;
         if (currentFile) {
           const fileName = currentFile.split(/[\\/]/).pop();
-          text += ` - ${fileName}`;
+          text = window.i18n.t("progress.processingFile", {
+            current,
+            total,
+            filename: fileName,
+          });
+        } else {
+          text = window.i18n.t("progress.processing", { current, total });
         }
         break;
       case "complete":
-        text = `Complete! Processed ${current}/${total} images`;
+        text = window.i18n.t("progress.complete", { current, total });
         percentage = 100;
         break;
       default:
-        text = `Processing ${current}/${total} images`;
+        text = window.i18n.t("progress.processing", { current, total });
     }
   }
 
@@ -178,7 +188,7 @@ function updateProgress(progress) {
 function showProgress() {
   progressContainer.classList.add("visible");
   progressFill.style.width = "0%";
-  progressText.textContent = "Preparing...";
+  progressText.textContent = window.i18n.t("progress.preparing");
 }
 
 function hideProgress() {
@@ -311,6 +321,15 @@ function clearValidationError(element) {
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
+  // Wait for i18n to be available
+  if (window.i18n) {
+    // Initialize i18n
+    window.i18n.updateUI();
+    window.i18n.updateDirection();
+  } else {
+    console.error("i18n not loaded");
+  }
+
   // Set initial state
   processBtn.classList.add("not-processing");
 
@@ -372,6 +391,43 @@ document.addEventListener("DOMContentLoaded", () => {
     sourceFolder.value = "";
     sourceFolder.classList.remove("selected");
   });
+
+  // Language switcher functionality
+  const langButtons = document.querySelectorAll(".lang-btn");
+  console.log("Found language buttons:", langButtons.length);
+
+  langButtons.forEach((btn, index) => {
+    console.log(`Button ${index}: "${btn.textContent}" (${btn.dataset.lang})`);
+    console.log(
+      `Button ${index} visible:`,
+      btn.offsetWidth > 0 && btn.offsetHeight > 0
+    );
+    console.log(
+      `Button ${index} styles:`,
+      window.getComputedStyle(btn).display,
+      window.getComputedStyle(btn).visibility
+    );
+
+    btn.addEventListener("click", () => {
+      const lang = btn.dataset.lang;
+      console.log("Language button clicked:", lang);
+      if (window.i18n) {
+        window.i18n.setLanguage(lang);
+      } else {
+        console.error("i18n not available");
+      }
+    });
+  });
+
+  // Force visibility check
+  const languageSwitcher = document.querySelector(".language-switcher");
+  if (languageSwitcher) {
+    console.log("Language switcher found:", languageSwitcher);
+    console.log(
+      "Language switcher children:",
+      languageSwitcher.children.length
+    );
+  }
 });
 
 // Drag and Drop functionality
