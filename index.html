@@ -536,6 +536,68 @@
             font-style: italic;
             font-size: 0.8rem;
         }
+
+        .end-btn {
+            padding: 8px 16px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .end-btn:hover {
+            background: #c53030;
+            transform: translateY(-1px);
+        }
+
+        /* Required and Optional Field Indicators */
+        .required {
+            color: #e53e3e;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .optional {
+            color: #718096;
+            font-weight: 400;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* Enhanced form validation styles */
+        input:required:invalid,
+        select:required:invalid {
+            border-color: #fc8181;
+            box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1);
+        }
+
+        input:required:valid,
+        select:required:valid {
+            border-color: #68d391;
+        }
+
+        .form-group.has-error .folder-path {
+            border-color: #fc8181;
+            box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1);
+        }
+
+        .validation-message {
+            font-size: 0.8rem;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .validation-message.error {
+            color: #e53e3e;
+        }
+
+        .validation-message.success {
+            color: #38a169;
+        }
     </style>
 </head>
 
@@ -558,7 +620,8 @@
             </div>
 
             <div class="form-group">
-                <label for="sourceFolder">Source Folder</label>
+                <label for="sourceFolder">Source Folder <span class="optional">(Optional - use drag & drop
+                        instead)</span></label>
                 <div class="folder-input">
                     <input type="text" id="sourceFolder" class="folder-path"
                         placeholder="Select source folder containing images..." readonly>
@@ -568,10 +631,10 @@
             </div>
 
             <div class="form-group">
-                <label for="destFolder">Destination Folder</label>
+                <label for="destFolder">Destination Folder <span class="required">*</span></label>
                 <div class="folder-input">
                     <input type="text" id="destFolder" class="folder-path"
-                        placeholder="Select destination folder for processed images..." readonly>
+                        placeholder="Select destination folder for processed images..." readonly required>
                     <button type="button" class="browse-btn" id="browseDest">Browse</button>
                 </div>
                 <div class="info-text">Choose where to save the processed images</div>
@@ -579,8 +642,8 @@
 
             <div class="input-row">
                 <div class="form-group">
-                    <label for="targetFormat">Target Format</label>
-                    <select id="targetFormat">
+                    <label for="targetFormat">Target Format <span class="required">*</span></label>
+                    <select id="targetFormat" required>
                         <option value="webp">WebP (.webp)</option>
                         <option value="avif">AVIF (.avif)</option>
                         <option value="jpeg">JPEG (.jpeg)</option>
@@ -590,9 +653,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="maxSize">Max Size (KB)</label>
-                    <input type="number" id="maxSize" value="500" min="10" max="10000" step="10">
-                    <div class="info-text">Maximum file size limit</div>
+                    <label for="maxSize">Max Size (KB) <span class="required">*</span></label>
+                    <input type="number" id="maxSize" value="500" min="10" max="10000" step="1" required>
+                    <div class="info-text">Maximum file size limit (10-10000 KB)</div>
                 </div>
             </div>
 
@@ -614,8 +677,9 @@
         <div class="summary-report" id="summaryReport">
             <div class="summary-header">
                 <div class="summary-title">📊 Compression Summary</div>
+                <button type="button" class="end-btn" id="endBtn">End</button>
             </div>
-            
+
             <div class="summary-stats">
                 <div class="stat-item">
                     <div class="stat-value" id="totalProcessed">0</div>

@@ -191,19 +191,27 @@ async function compressImage(inputBuffer, targetFormat, maxSizeKB) {
  * @param {string} outputPath - Output file path
  * @param {string} targetFormat - Target format
  * @param {number} maxSizeKB - Maximum size in KB
- * @returns {Promise<boolean>} Success status
+ * @returns {Promise<Object>} Processing result with details
  */
 async function processImage(inputPath, outputPath, targetFormat, maxSizeKB) {
   try {
     // Read input file
     const inputBuffer = await fs.readFile(inputPath);
+    const inputSize = inputBuffer.length;
 
     // Check if file is already small enough and in correct format
     const currentExt = path.extname(inputPath).toLowerCase().substring(1);
     if (currentExt === targetFormat && inputBuffer.length <= maxSizeKB * 1024) {
       // Just copy the file
       await fs.copyFile(inputPath, outputPath);
-      return true;
+      return {
+        success: true,
+        inputSize,
+        outputSize: inputSize,
+        compressionRatio: 0,
+        skipped: false,
+        reason: "Already optimized",
+      };
     }
 
     // Compress and convert
@@ -219,10 +227,26 @@ async function processImage(inputPath, outputPath, targetFormat, maxSizeKB) {
     // Write output file
     await fs.writeFile(outputPath, outputBuffer);
 
-    return true;
+    const outputSize = outputBuffer.length;
+    const compressionRatio = ((inputSize - outputSize) / inputSize) * 100;
+
+    return {
+      success: true,
+      inputSize,
+      outputSize,
+      compressionRatio: Math.max(0, compressionRatio),
+      skipped: false,
+    };
   } catch (error) {
     console.error(`Error processing ${inputPath}:`, error.message);
-    return false;
+    return {
+      success: false,
+      inputSize: 0,
+      outputSize: 0,
+      compressionRatio: 0,
+      skipped: true,
+      reason: error.message,
+    };
   }
 }
 
@@ -294,6 +318,7 @@ async function processImages(
     // Process each image
     let processedCount = 0;
     let skippedCount = 0;
+    const detailedResults = [];
 
     for (let i = 0; i < imageFiles.length; i++) {
       const inputPath = imageFiles[i];
@@ -319,14 +344,22 @@ async function processImages(
         stage: "processing",
       });
 
-      const success = await processImage(
+      const result = await processImage(
         inputPath,
         outputPath,
         targetFormat,
         maxSizeKB
       );
 
-      if (success) {
+      // Store detailed result
+      detailedResults.push({
+        filename: path.basename(inputPath),
+        inputPath,
+        outputPath,
+        ...result,
+      });
+
+      if (result.success && !result.skipped) {
         processedCount++;
       } else {
         skippedCount++;
@@ -343,6 +376,7 @@ async function processImages(
       processedCount,
       skippedCount,
       totalFiles: imageFiles.length,
+      detailedResults,
     };
   } catch (error) {
     console.error("Error in processImages:", error);

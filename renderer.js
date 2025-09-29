@@ -13,6 +13,12 @@ const progressText = document.getElementById("progressText");
 const statusMessage = document.getElementById("statusMessage");
 const dragDropZone = document.getElementById("dragDropZone");
 const droppedFiles = document.getElementById("droppedFiles");
+const summaryReport = document.getElementById("summaryReport");
+const totalProcessed = document.getElementById("totalProcessed");
+const totalSaved = document.getElementById("totalSaved");
+const avgCompression = document.getElementById("avgCompression");
+const fileResults = document.getElementById("fileResults");
+const endBtn = document.getElementById("endBtn");
 
 // State
 let isProcessing = false;
@@ -85,6 +91,7 @@ async function startProcessing() {
   isProcessing = true;
   updateProcessingState(true);
   hideStatusMessage();
+  hideSummaryReport();
   showProgress();
 
   try {
@@ -107,6 +114,9 @@ async function startProcessing() {
     showSuccess(
       `Successfully processed ${result.processedCount} images! ${result.skippedCount} files were skipped.`
     );
+
+    // Show detailed summary
+    showSummaryReport(result);
   } catch (error) {
     console.error("Processing error:", error);
     showError("Processing failed: " + error.message);
@@ -189,18 +199,159 @@ function hideStatusMessage() {
   statusMessage.classList.remove("visible");
 }
 
+function showSummaryReport(result) {
+  if (!result.detailedResults || result.detailedResults.length === 0) {
+    return;
+  }
+
+  const results = result.detailedResults;
+
+  // Calculate totals
+  let totalSpaceSaved = 0;
+  let totalCompressionRatio = 0;
+  let successfulCompressions = 0;
+
+  results.forEach((item) => {
+    if (item.success && !item.skipped) {
+      totalSpaceSaved += item.inputSize - item.outputSize;
+      totalCompressionRatio += item.compressionRatio;
+      successfulCompressions++;
+    }
+  });
+
+  const avgCompRatio =
+    successfulCompressions > 0
+      ? totalCompressionRatio / successfulCompressions
+      : 0;
+
+  // Update summary stats
+  totalProcessed.textContent = result.processedCount;
+  totalSaved.textContent = formatFileSize(totalSpaceSaved);
+  avgCompression.textContent = Math.round(avgCompRatio) + "%";
+
+  // Generate file results HTML
+  const resultsHtml = results
+    .map((item) => {
+      const compressionClass = getCompressionClass(item.compressionRatio);
+      const statusClass = item.success ? "success" : "skipped";
+
+      if (item.skipped || !item.success) {
+        return `
+        <div class="result-item ${statusClass}">
+          <div class="result-filename">${item.filename}</div>
+          <div class="skipped-reason">${
+            item.reason || "Processing failed"
+          }</div>
+        </div>
+      `;
+      }
+
+      return `
+      <div class="result-item ${statusClass}">
+        <div class="result-filename">${item.filename}</div>
+        <div class="result-sizes">
+          <span class="size-before">${formatFileSize(item.inputSize)}</span>
+          <span class="size-arrow">→</span>
+          <span class="size-after">${formatFileSize(item.outputSize)}</span>
+          <span class="compression-percent ${compressionClass}">
+            ${Math.round(item.compressionRatio)}%
+          </span>
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  fileResults.innerHTML = resultsHtml;
+  summaryReport.classList.add("visible");
+}
+
+function getCompressionClass(ratio) {
+  if (ratio >= 50) return "high";
+  if (ratio >= 25) return "medium";
+  return "low";
+}
+
+function hideSummaryReport() {
+  summaryReport.classList.remove("visible");
+}
+
+function showValidationError(element, message) {
+  const formGroup = element.closest(".form-group");
+  formGroup.classList.add("has-error");
+
+  // Remove existing validation message
+  const existingMessage = formGroup.querySelector(".validation-message");
+  if (existingMessage) {
+    existingMessage.remove();
+  }
+
+  // Add new validation message
+  const validationDiv = document.createElement("div");
+  validationDiv.className = "validation-message error";
+  validationDiv.textContent = message;
+
+  const infoText = formGroup.querySelector(".info-text");
+  if (infoText) {
+    infoText.parentNode.insertBefore(validationDiv, infoText.nextSibling);
+  } else {
+    formGroup.appendChild(validationDiv);
+  }
+}
+
+function clearValidationError(element) {
+  const formGroup = element.closest(".form-group");
+  formGroup.classList.remove("has-error");
+
+  const validationMessage = formGroup.querySelector(".validation-message");
+  if (validationMessage) {
+    validationMessage.remove();
+  }
+}
+
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
   // Set initial state
   processBtn.classList.add("not-processing");
 
-  // Validate max size input
-  maxSize.addEventListener("input", (e) => {
+  // Validate max size input on blur (when user finishes typing)
+  maxSize.addEventListener("blur", (e) => {
     const value = parseInt(e.target.value);
     if (isNaN(value) || value < 10) {
       e.target.value = 10;
+      showValidationError(e.target, "Minimum size is 10 KB");
     } else if (value > 10000) {
       e.target.value = 10000;
+      showValidationError(e.target, "Maximum size is 10000 KB");
+    } else {
+      clearValidationError(e.target);
+    }
+  });
+
+  // Clear validation on input
+  maxSize.addEventListener("input", (e) => {
+    clearValidationError(e.target);
+  });
+
+  // Allow only numbers in max size input
+  maxSize.addEventListener("keypress", (e) => {
+    // Allow: backspace, delete, tab, escape, enter, and .
+    if (
+      [46, 8, 9, 27, 13, 110, 190].indexOf(e.keyCode) !== -1 ||
+      // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      (e.keyCode === 65 && e.ctrlKey === true) ||
+      (e.keyCode === 67 && e.ctrlKey === true) ||
+      (e.keyCode === 86 && e.ctrlKey === true) ||
+      (e.keyCode === 88 && e.ctrlKey === true)
+    ) {
+      return;
+    }
+    // Ensure that it is a number and stop the keypress
+    if (
+      (e.shiftKey || e.keyCode < 48 || e.keyCode > 57) &&
+      (e.keyCode < 96 || e.keyCode > 105)
+    ) {
+      e.preventDefault();
     }
   });
 
@@ -211,6 +362,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize drag and drop
   setupDragAndDrop();
+
+  // End button functionality
+  endBtn.addEventListener("click", () => {
+    hideSummaryReport();
+    hideStatusMessage();
+    // Reset the form for new processing
+    clearAllFiles();
+    sourceFolder.value = "";
+    sourceFolder.classList.remove("selected");
+  });
 });
 
 // Drag and Drop functionality
