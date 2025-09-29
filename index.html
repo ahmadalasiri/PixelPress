@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelPress - Image Compression Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .folder-input {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .folder-path {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: #f7fafc;
+            color: #4a5568;
+            cursor: not-allowed;
+        }
+
+        .folder-path.selected {
+            background: #e6fffa;
+            border-color: #38b2ac;
+            color: #2d3748;
+        }
+
+        .browse-btn {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .browse-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        select,
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+            transition: border-color 0.2s;
+        }
+
+        select:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .process-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .process-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-container {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .progress-container.visible {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-message {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .status-message.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+
+        .status-message.visible {
+            display: block;
+        }
+
+        .info-text {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .processing .spinner {
+            display: inline-block;
+        }
+
+        .processing .btn-text {
+            display: none;
+        }
+
+        .not-processing .spinner {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PixelPress</h1>
+            <p>Compress and convert your images with ease</p>
+        </div>
+
+        <form id="imageForm">
+            <div class="form-group">
+                <label for="sourceFolder">Source Folder</label>
+                <div class="folder-input">
+                    <input type="text" id="sourceFolder" class="folder-path"
+                        placeholder="Select source folder containing images..." readonly>
+                    <button type="button" class="browse-btn" id="browseSrc">Browse</button>
+                </div>
+                <div class="info-text">Choose the folder containing images you want to process</div>
+            </div>
+
+            <div class="form-group">
+                <label for="destFolder">Destination Folder</label>
+                <div class="folder-input">
+                    <input type="text" id="destFolder" class="folder-path"
+                        placeholder="Select destination folder for processed images..." readonly>
+                    <button type="button" class="browse-btn" id="browseDest">Browse</button>
+                </div>
+                <div class="info-text">Choose where to save the processed images</div>
+            </div>
+
+            <div class="input-row">
+                <div class="form-group">
+                    <label for="targetFormat">Target Format</label>
+                    <select id="targetFormat">
+                        <option value="webp">WebP (.webp)</option>
+                        <option value="avif">AVIF (.avif)</option>
+                        <option value="jpeg">JPEG (.jpeg)</option>
+                        <option value="png">PNG (.png)</option>
+                    </select>
+                    <div class="info-text">Output image format</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="maxSize">Max Size (KB)</label>
+                    <input type="number" id="maxSize" value="500" min="10" max="10000" step="10">
+                    <div class="info-text">Maximum file size limit</div>
+                </div>
+            </div>
+
+            <button type="submit" class="process-btn" id="processBtn">
+                <span class="spinner"></span>
+                <span class="btn-text">Start Processing</span>
+            </button>
+        </form>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Preparing...</div>
+        </div>
+
+        <div class="status-message" id="statusMessage"></div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+
+</html>

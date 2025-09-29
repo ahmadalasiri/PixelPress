@@ -1,0 +1,334 @@
+const sharp = require("sharp");
+const fs = require("fs").promises;
+const path = require("path");
+
+// Supported image extensions
+const SUPPORTED_EXTENSIONS = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".avif",
+  ".tiff",
+  ".tif",
+  ".bmp",
+  ".gif",
+];
+
+/**
+ * Get all image files recursively from a directory
+ * @param {string} dirPath - Directory path to scan
+ * @param {Array} fileList - Array to store found files
+ * @returns {Promise<Array>} Array of image file paths
+ */
+async function getImageFiles(dirPath, fileList = []) {
+  try {
+    const files = await fs.readdir(dirPath);
+
+    for (const file of files) {
+      const filePath = path.join(dirPath, file);
+      const stat = await fs.stat(filePath);
+
+      if (stat.isDirectory()) {
+        // Recursively scan subdirectories
+        await getImageFiles(filePath, fileList);
+      } else if (stat.isFile()) {
+        const ext = path.extname(file).toLowerCase();
+        if (SUPPORTED_EXTENSIONS.includes(ext)) {
+          fileList.push(filePath);
+        }
+      }
+    }
+  } catch (error) {
+    console.error(`Error scanning directory ${dirPath}:`, error.message);
+  }
+
+  return fileList;
+}
+
+/**
+ * Ensure directory exists, create if it doesn't
+ * @param {string} dirPath - Directory path
+ */
+async function ensureDirectoryExists(dirPath) {
+  try {
+    await fs.access(dirPath);
+  } catch (error) {
+    await fs.mkdir(dirPath, { recursive: true });
+  }
+}
+
+/**
+ * Get the relative path structure to maintain folder hierarchy
+ * @param {string} filePath - Full file path
+ * @param {string} basePath - Base directory path
+ * @returns {string} Relative path
+ */
+function getRelativePath(filePath, basePath) {
+  return path.relative(basePath, filePath);
+}
+
+/**
+ * Compress and resize image to meet size requirements
+ * @param {Buffer} inputBuffer - Input image buffer
+ * @param {string} targetFormat - Target format (webp, avif, jpeg, png)
+ * @param {number} maxSizeKB - Maximum file size in KB
+ * @returns {Promise<Buffer>} Compressed image buffer
+ */
+async function compressImage(inputBuffer, targetFormat, maxSizeKB) {
+  const maxSizeBytes = maxSizeKB * 1024;
+  let quality = 90;
+  let width = null;
+
+  // Get original image metadata
+  const metadata = await sharp(inputBuffer).metadata();
+  const originalWidth = metadata.width;
+
+  while (quality >= 10) {
+    let sharpInstance = sharp(inputBuffer);
+
+    // Resize if width is set
+    if (width && width < originalWidth) {
+      sharpInstance = sharpInstance.resize(width, null, {
+        withoutEnlargement: true,
+        fit: "inside",
+      });
+    }
+
+    // Apply format-specific compression
+    switch (targetFormat) {
+      case "webp":
+        sharpInstance = sharpInstance.webp({
+          quality,
+          effort: 6,
+          smartSubsample: true,
+        });
+        break;
+      case "avif":
+        sharpInstance = sharpInstance.avif({
+          quality,
+          effort: 4,
+          chromaSubsampling: "4:2:0",
+        });
+        break;
+      case "jpeg":
+        sharpInstance = sharpInstance.jpeg({
+          quality,
+          progressive: true,
+          mozjpeg: true,
+        });
+        break;
+      case "png":
+        sharpInstance = sharpInstance.png({
+          quality,
+          compressionLevel: 9,
+          adaptiveFiltering: true,
+        });
+        break;
+      default:
+        throw new Error(`Unsupported format: ${targetFormat}`);
+    }
+
+    const outputBuffer = await sharpInstance.toBuffer();
+
+    // Check if size is acceptable
+    if (outputBuffer.length <= maxSizeBytes) {
+      return outputBuffer;
+    }
+
+    // If still too large, try reducing quality or size
+    if (quality > 60) {
+      quality -= 10;
+    } else if (quality > 30) {
+      quality -= 5;
+    } else {
+      // Start reducing dimensions
+      if (!width) {
+        width = Math.floor(originalWidth * 0.9);
+      } else {
+        width = Math.floor(width * 0.9);
+      }
+
+      // Reset quality for new dimensions
+      if (width < originalWidth * 0.3) {
+        // If we've reduced too much, break to avoid infinite loop
+        break;
+      }
+      quality = 80;
+    }
+  }
+
+  // If we still can't meet the size requirement, return the last attempt
+  let finalSharp = sharp(inputBuffer);
+  if (width && width < originalWidth) {
+    finalSharp = finalSharp.resize(width, null, {
+      withoutEnlargement: true,
+      fit: "inside",
+    });
+  }
+
+  switch (targetFormat) {
+    case "webp":
+      return await finalSharp.webp({ quality: 10, effort: 6 }).toBuffer();
+    case "avif":
+      return await finalSharp.avif({ quality: 10, effort: 4 }).toBuffer();
+    case "jpeg":
+      return await finalSharp
+        .jpeg({ quality: 10, progressive: true })
+        .toBuffer();
+    case "png":
+      return await finalSharp
+        .png({ quality: 10, compressionLevel: 9 })
+        .toBuffer();
+    default:
+      throw new Error(`Unsupported format: ${targetFormat}`);
+  }
+}
+
+/**
+ * Process a single image file
+ * @param {string} inputPath - Input file path
+ * @param {string} outputPath - Output file path
+ * @param {string} targetFormat - Target format
+ * @param {number} maxSizeKB - Maximum size in KB
+ * @returns {Promise<boolean>} Success status
+ */
+async function processImage(inputPath, outputPath, targetFormat, maxSizeKB) {
+  try {
+    // Read input file
+    const inputBuffer = await fs.readFile(inputPath);
+
+    // Check if file is already small enough and in correct format
+    const currentExt = path.extname(inputPath).toLowerCase().substring(1);
+    if (currentExt === targetFormat && inputBuffer.length <= maxSizeKB * 1024) {
+      // Just copy the file
+      await fs.copyFile(inputPath, outputPath);
+      return true;
+    }
+
+    // Compress and convert
+    const outputBuffer = await compressImage(
+      inputBuffer,
+      targetFormat,
+      maxSizeKB
+    );
+
+    // Ensure output directory exists
+    await ensureDirectoryExists(path.dirname(outputPath));
+
+    // Write output file
+    await fs.writeFile(outputPath, outputBuffer);
+
+    return true;
+  } catch (error) {
+    console.error(`Error processing ${inputPath}:`, error.message);
+    return false;
+  }
+}
+
+/**
+ * Main function to process all images in a directory
+ * @param {string} sourcePath - Source directory path
+ * @param {string} destinationPath - Destination directory path
+ * @param {string} targetFormat - Target format (webp, avif, jpeg, png)
+ * @param {number} maxSizeKB - Maximum file size in KB
+ * @param {Function} progressCallback - Progress callback function
+ * @returns {Promise<Object>} Processing results
+ */
+async function processImages(
+  sourcePath,
+  destinationPath,
+  targetFormat,
+  maxSizeKB,
+  progressCallback
+) {
+  try {
+    // Validate inputs
+    if (!sourcePath || !destinationPath) {
+      throw new Error("Source and destination paths are required");
+    }
+
+    if (!SUPPORTED_EXTENSIONS.includes(`.${targetFormat}`)) {
+      throw new Error(`Unsupported target format: ${targetFormat}`);
+    }
+
+    if (maxSizeKB < 10 || maxSizeKB > 10000) {
+      throw new Error("Maximum size must be between 10 and 10000 KB");
+    }
+
+    // Scan for image files
+    progressCallback({ current: 0, total: 0, stage: "scanning" });
+
+    const imageFiles = await getImageFiles(sourcePath);
+
+    if (imageFiles.length === 0) {
+      throw new Error("No supported image files found in the source directory");
+    }
+
+    progressCallback({
+      current: imageFiles.length,
+      total: imageFiles.length,
+      stage: "scanning",
+    });
+
+    // Process each image
+    let processedCount = 0;
+    let skippedCount = 0;
+
+    for (let i = 0; i < imageFiles.length; i++) {
+      const inputPath = imageFiles[i];
+      const relativePath = getRelativePath(inputPath, sourcePath);
+
+      // Change extension to target format
+      const parsedPath = path.parse(relativePath);
+      const outputFileName = `${parsedPath.name}.${targetFormat}`;
+      const outputPath = path.join(
+        destinationPath,
+        parsedPath.dir,
+        outputFileName
+      );
+
+      progressCallback({
+        current: i + 1,
+        total: imageFiles.length,
+        currentFile: inputPath,
+        stage: "processing",
+      });
+
+      const success = await processImage(
+        inputPath,
+        outputPath,
+        targetFormat,
+        maxSizeKB
+      );
+
+      if (success) {
+        processedCount++;
+      } else {
+        skippedCount++;
+      }
+    }
+
+    progressCallback({
+      current: imageFiles.length,
+      total: imageFiles.length,
+      stage: "complete",
+    });
+
+    return {
+      processedCount,
+      skippedCount,
+      totalFiles: imageFiles.length,
+    };
+  } catch (error) {
+    console.error("Error in processImages:", error);
+    throw error;
+  }
+}
+
+module.exports = {
+  processImages,
+  getImageFiles,
+  compressImage,
+  SUPPORTED_EXTENSIONS,
+};
