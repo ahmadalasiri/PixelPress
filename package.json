@@ -21,7 +21,7 @@
     "sharp",
     "desktop"
   ],
-  "author": "Your Name",
+  "author": "ahmadalasiri <contact@ahmadalasiri.info>",
   "license": "MIT",
   "devDependencies": {
     "electron": "^27.0.0",

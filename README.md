@@ -2,11 +2,22 @@
 
 A powerful desktop application for batch image compression and format conversion built with Electron, Node.js, and Sharp.
 
+## 📥 Download
+
+### 🚀 **[⬇️ Download PixelPress v1.0.0 for Windows](https://github.com/ahmadalasiri/pixelpress/releases/download/v1.0.0/PixelPress-Setup-v1.0.0.exe)**
+
+_86.3 MB | Windows 10+ | Free & Open Source_
+
+**Quick Install:** Download → Run → Click "More info" → "Run anyway" → Follow installer
+
+**Alternative:** [View all releases](https://github.com/ahmadalasiri/pixelpress/releases) | [Download instructions](DOWNLOAD_INSTRUCTIONS.md)
+
 ![PixelPress Screenshot](assets/icon.png)
 
 ## ✨ Features
 
 ### 🎯 Core Functionality
+
 - **Batch Processing**: Process entire folders of images recursively
 - **Drag & Drop**: Simply drag and drop individual or multiple images
 - **Multiple Formats**: Convert to WebP, AVIF, JPEG, or PNG
@@ -15,12 +26,14 @@ A powerful desktop application for batch image compression and format conversion
 - **Flexible Input**: Choose between folder processing or individual file selection
 
 ### 📊 Advanced Features
+
 - **Detailed Summary**: Complete compression report with before/after sizes and percentages
 - **Progress Tracking**: Real-time progress updates with current file names
 - **Smart Validation**: Intelligent form validation with helpful error messages
 - **File Size Control**: Minimum 1 KB limit with no upper restriction
 
 ### 🎨 User Experience
+
 - **Dark Mode**: Beautiful dark theme with smooth transitions
 - **Multi-Language**: Full Arabic and English language support with RTL layout
 - **Modern UI**: Clean, intuitive interface with smooth animations
@@ -39,7 +52,7 @@ A powerful desktop application for batch image compression and format conversion
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/pixelpress.git
+git clone https://github.com/ahmadalasiri/pixelpress.git
 cd pixelpress
 ```
 
@@ -70,11 +83,13 @@ This uses nodemon to automatically restart the app when files change.
 ### 🎯 Two Ways to Add Images
 
 #### Method 1: Drag & Drop (Recommended)
+
 1. **Drag Images**: Simply drag and drop image files directly into the blue dashed area
 2. **Multiple Selection**: Drop multiple images at once or use the "Browse" button in the drop zone
 3. **File Management**: View selected files with sizes, remove individual files, or clear all
 
 #### Method 2: Folder Processing
+
 1. **Select Source Folder**: Click "Browse" next to "Source Folder" and choose the folder containing your images
 2. **Recursive Processing**: All images in subfolders will be processed automatically
 
@@ -99,6 +114,7 @@ This uses nodemon to automatically restart the app when files change.
 ### Example Workflows
 
 #### Drag & Drop Workflow
+
 ```
 1. Drag 5 photos into the drop zone
 2. Select destination: C:\Users\Pictures\Compressed
@@ -108,6 +124,7 @@ This uses nodemon to automatically restart the app when files change.
 ```
 
 #### Folder Processing Workflow
+
 ```
 Source: C:\Users\Pictures\Photos (contains 50 images in subfolders)
 Destination: C:\Users\Pictures\Compressed
@@ -285,7 +302,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues or have questions:
 
-1. Check the [Issues](https://github.com/yourusername/pixelpress/issues) page
+1. Check the [Issues](https://github.com/ahmadalasiri/pixelpress/issues) page
 2. Create a new issue with detailed information
 3. Include your OS, Node.js version, and error messages
 
