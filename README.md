@@ -6,13 +6,26 @@ A powerful desktop application for batch image compression and format conversion
 
 ## ✨ Features
 
+### 🎯 Core Functionality
 - **Batch Processing**: Process entire folders of images recursively
+- **Drag & Drop**: Simply drag and drop individual or multiple images
 - **Multiple Formats**: Convert to WebP, AVIF, JPEG, or PNG
 - **Smart Compression**: Automatically compress images to meet size requirements
 - **Folder Structure**: Maintains original folder hierarchy in output
-- **Progress Tracking**: Real-time progress updates with file names
+- **Flexible Input**: Choose between folder processing or individual file selection
+
+### 📊 Advanced Features
+- **Detailed Summary**: Complete compression report with before/after sizes and percentages
+- **Progress Tracking**: Real-time progress updates with current file names
+- **Smart Validation**: Intelligent form validation with helpful error messages
+- **File Size Control**: Minimum 1 KB limit with no upper restriction
+
+### 🎨 User Experience
+- **Dark Mode**: Beautiful dark theme with smooth transitions
+- **Multi-Language**: Full Arabic and English language support with RTL layout
+- **Modern UI**: Clean, intuitive interface with smooth animations
 - **Cross-Platform**: Works on Windows, macOS, and Linux
-- **Modern UI**: Clean, intuitive interface with drag-and-drop feel
+- **Auto-Save Preferences**: Remembers your theme and language choices
 
 ## 🚀 Quick Start
 
@@ -42,27 +55,64 @@ npm install
 npm start
 ```
 
+### Development Mode
+
+For development with auto-reload:
+
+```bash
+npm run watch
+```
+
+This uses nodemon to automatically restart the app when files change.
+
 ## 📖 Usage
 
+### 🎯 Two Ways to Add Images
+
+#### Method 1: Drag & Drop (Recommended)
+1. **Drag Images**: Simply drag and drop image files directly into the blue dashed area
+2. **Multiple Selection**: Drop multiple images at once or use the "Browse" button in the drop zone
+3. **File Management**: View selected files with sizes, remove individual files, or clear all
+
+#### Method 2: Folder Processing
 1. **Select Source Folder**: Click "Browse" next to "Source Folder" and choose the folder containing your images
-2. **Select Destination Folder**: Click "Browse" next to "Destination Folder" and choose where to save processed images
-3. **Choose Target Format**: Select your desired output format from the dropdown:
+2. **Recursive Processing**: All images in subfolders will be processed automatically
+
+### ⚙️ Configuration
+
+1. **Select Destination Folder**: Click "Browse" next to "Destination Folder" (Required)
+2. **Choose Target Format**: Select your desired output format:
    - **WebP** (.webp) - Best compression, modern browsers
    - **AVIF** (.avif) - Next-gen format, excellent compression
    - **JPEG** (.jpeg) - Universal compatibility
    - **PNG** (.png) - Lossless compression
-4. **Set Maximum Size**: Enter the maximum file size in KB (default: 500 KB)
-5. **Start Processing**: Click "Start Processing" and watch the progress bar
+3. **Set Maximum Size**: Enter the maximum file size in KB (minimum 1 KB, no upper limit)
+4. **Start Processing**: Click "Start Processing" and watch the real-time progress
 
-### Example Workflow
+### 🎨 Interface Features
 
+- **🌙 Dark Mode**: Click the sun/moon icon to toggle between light and dark themes
+- **🌍 Language**: Switch between English and Arabic (العربية) with full RTL support
+- **📊 Summary Report**: After processing, view detailed compression statistics
+- **💾 Auto-Save**: Your theme and language preferences are automatically saved
+
+### Example Workflows
+
+#### Drag & Drop Workflow
 ```
-Source: C:\Users\Pictures\Photos
-Destination: C:\Users\Pictures\Compressed
-Format: WebP
-Max Size: 300 KB
+1. Drag 5 photos into the drop zone
+2. Select destination: C:\Users\Pictures\Compressed
+3. Format: WebP, Max Size: 300 KB
+4. Click "Start Processing"
+5. View summary: 5 processed, 2.1 MB saved, 65% avg compression
+```
 
-Result: All images converted to WebP format under 300 KB
+#### Folder Processing Workflow
+```
+Source: C:\Users\Pictures\Photos (contains 50 images in subfolders)
+Destination: C:\Users\Pictures\Compressed
+Format: AVIF, Max Size: 200 KB
+Result: All 50 images converted with folder structure maintained
 ```
 
 ## 🛠️ Development
@@ -70,10 +120,15 @@ Result: All images converted to WebP format under 300 KB
 ### Running in Development Mode
 
 ```bash
+# Standard development mode
 npm run dev
+
+# Auto-reload development mode (recommended)
+npm run watch
 ```
 
-This opens the application with developer tools enabled.
+- `npm run dev`: Opens the application with developer tools enabled
+- `npm run watch`: Uses nodemon for automatic restart when files change
 
 ### Project Structure
 
@@ -81,11 +136,13 @@ This opens the application with developer tools enabled.
 pixelpress/
 ├── main.js              # Electron main process
 ├── preload.js           # Secure IPC bridge
-├── index.html           # User interface
-├── renderer.js          # UI logic and event handling
+├── index.html           # User interface with dark mode support
+├── renderer.js          # UI logic, drag-drop, and theme management
 ├── imageProcessor.js    # Image processing with Sharp
+├── i18n.js              # Internationalization (English/Arabic)
 ├── package.json         # Dependencies and build config
 ├── assets/              # Application icons
+├── .gitignore           # Git ignore rules
 └── README.md           # This file
 ```
 
@@ -93,8 +150,10 @@ pixelpress/
 
 - **Electron**: Desktop application framework
 - **Sharp**: High-performance image processing
-- **Node.js**: Backend runtime
-- **HTML/CSS/JS**: Modern web technologies for UI
+- **Node.js**: Backend runtime with IPC communication
+- **HTML/CSS/JS**: Modern web technologies with CSS variables for theming
+- **Internationalization**: Custom i18n system with RTL support
+- **Nodemon**: Development auto-reload functionality
 
 ## 📦 Building for Distribution
 
@@ -149,9 +208,11 @@ Built applications will be available in the `dist/` folder.
 ### Default Settings
 
 - **Target Format**: WebP
-- **Maximum Size**: 500 KB
+- **Maximum Size**: 500 KB (minimum 1 KB, no upper limit)
 - **Quality Range**: 90-10 (auto-adjusted)
 - **Resize Strategy**: Proportional scaling when needed
+- **Theme**: Light mode
+- **Language**: English (with Arabic support)
 
 ### Compression Algorithm
 
@@ -191,6 +252,8 @@ Built applications will be available in the `dist/` folder.
 - **SSD storage**: Use SSD drives for faster processing
 - **Memory**: Ensure sufficient RAM for large images
 - **Format choice**: WebP offers best compression/quality balance
+- **Drag & Drop**: Use drag & drop for better performance with individual files
+- **Dark Mode**: Use dark mode for comfortable extended usage
 
 ## 🤝 Contributing
 
