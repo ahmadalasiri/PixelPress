@@ -53,7 +53,8 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.png",
+      "forceCodeSigning": false
     },
     "mac": {
       "target": "dmg",
