@@ -159,18 +159,18 @@
 
         .browse-btn {
             padding: 12px 20px;
-            background: #667eea;
+            background: var(--button-primary);
             color: white;
             border: none;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             white-space: nowrap;
         }
 
         .browse-btn:hover {
-            background: #5a67d8;
+            background: var(--button-primary-hover);
             transform: translateY(-1px);
         }
 
@@ -187,31 +187,32 @@
         input[type="number"] {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 0.95rem;
-            background: white;
-            transition: border-color 0.2s;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
 
         select:focus,
         input[type="number"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--button-primary);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .process-btn {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--button-primary) 0%, var(--button-primary-hover) 100%);
             color: white;
             border: none;
             border-radius: 12px;
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             margin-top: 32px;
             position: relative;
             overflow: hidden;
@@ -287,8 +288,9 @@
 
         .info-text {
             font-size: 0.85rem;
-            color: #718096;
+            color: var(--text-secondary);
             margin-top: 4px;
+            transition: color 0.3s ease;
         }
 
         .spinner {
@@ -322,34 +324,35 @@
 
         /* Drag and Drop Styles */
         .drag-drop-zone {
-            border: 3px dashed #cbd5e0;
+            border: 3px dashed var(--drag-zone-border);
             border-radius: 12px;
             padding: 40px 20px;
             text-align: center;
             margin-bottom: 32px;
-            background: #f7fafc;
+            background: var(--drag-zone-bg);
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
         }
 
         .drag-drop-zone:hover {
-            border-color: #667eea;
-            background: #edf2f7;
+            border-color: var(--button-primary);
+            background: var(--drag-zone-hover);
         }
 
         .drag-drop-zone.drag-over {
-            border-color: #667eea;
-            background: #e6fffa;
+            border-color: var(--button-primary);
+            background: var(--drag-zone-active);
             transform: scale(1.02);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
         }
 
         .drag-drop-content h3 {
-            color: #2d3748;
+            color: var(--text-primary);
             font-size: 1.4rem;
             margin-bottom: 8px;
             font-weight: 600;
+            transition: color 0.3s ease;
         }
 
         .drag-drop-content p {
@@ -365,10 +368,11 @@
         }
 
         .drag-drop-or {
-            color: #a0aec0;
+            color: var(--text-muted);
             font-weight: 600;
             font-size: 0.9rem;
             margin: 16px 0;
+            transition: color 0.3s ease;
         }
 
         .dropped-files {
