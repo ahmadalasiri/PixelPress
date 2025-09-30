@@ -19,6 +19,7 @@ const totalSaved = document.getElementById("totalSaved");
 const avgCompression = document.getElementById("avgCompression");
 const fileResults = document.getElementById("fileResults");
 const endBtn = document.getElementById("endBtn");
+const themeToggle = document.getElementById("themeToggle");
 
 // State
 let isProcessing = false;
@@ -319,6 +320,31 @@ function clearValidationError(element) {
   }
 }
 
+// Dark Mode Management
+class ThemeManager {
+  constructor() {
+    this.currentTheme = localStorage.getItem("pixelpress-theme") || "light";
+    this.applyTheme(this.currentTheme);
+  }
+
+  toggleTheme() {
+    this.currentTheme = this.currentTheme === "light" ? "dark" : "light";
+    this.applyTheme(this.currentTheme);
+    localStorage.setItem("pixelpress-theme", this.currentTheme);
+  }
+
+  applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+  }
+
+  getCurrentTheme() {
+    return this.currentTheme;
+  }
+}
+
+// Initialize theme manager
+const themeManager = new ThemeManager();
+
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
   // Wait for i18n to be available
@@ -336,12 +362,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Validate max size input on blur (when user finishes typing)
   maxSize.addEventListener("blur", (e) => {
     const value = parseInt(e.target.value);
-    if (isNaN(value) || value < 10) {
-      e.target.value = 10;
-      showValidationError(e.target, "Minimum size is 10 KB");
-    } else if (value > 10000) {
-      e.target.value = 10000;
-      showValidationError(e.target, "Maximum size is 10000 KB");
+    if (isNaN(value) || value < 1) {
+      e.target.value = 1;
+      showValidationError(e.target, "Minimum size is 1 KB");
     } else {
       clearValidationError(e.target);
     }
@@ -428,6 +451,11 @@ document.addEventListener("DOMContentLoaded", () => {
       languageSwitcher.children.length
     );
   }
+
+  // Theme toggle functionality
+  themeToggle.addEventListener("click", () => {
+    themeManager.toggleTheme();
+  });
 });
 
 // Drag and Drop functionality
