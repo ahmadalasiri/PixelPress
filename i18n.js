@@ -26,6 +26,7 @@ class I18n {
           maxSizeInfo: "Maximum file size limit (minimum 1 KB)",
           browse: "Browse",
           startProcessing: "Start Processing",
+          cancelProcessing: "Cancel Processing",
         },
         progress: {
           preparing: "Preparing...",
@@ -33,6 +34,7 @@ class I18n {
           processing: "Processing {current}/{total} images",
           processingFile: "Processing {current}/{total} images - {filename}",
           complete: "Complete! Processed {current}/{total} images",
+          cancelling: "Cancelling processing...",
         },
         messages: {
           selectSource:
@@ -51,6 +53,7 @@ class I18n {
           errorSelectingDest: "Error selecting destination folder: {error}",
           errorSelectingFiles: "Error selecting files: {error}",
           processingFailed: "Processing failed",
+          processingCancelled: "Processing was cancelled by user",
         },
         summary: {
           title: "📊 Compression Summary",
@@ -88,6 +91,7 @@ class I18n {
           maxSizeInfo: "الحد الأقصى لحجم الملف (الحد الأدنى 1 كيلوبايت)",
           browse: "تصفح",
           startProcessing: "بدء المعالجة",
+          cancelProcessing: "إلغاء المعالجة",
         },
         progress: {
           preparing: "جاري التحضير...",
@@ -95,6 +99,7 @@ class I18n {
           processing: "معالجة {current}/{total} صورة",
           processingFile: "معالجة {current}/{total} صورة - {filename}",
           complete: "مكتمل! تم معالجة {current}/{total} صورة",
+          cancelling: "جاري إلغاء المعالجة...",
         },
         messages: {
           selectSource: "يرجى اختيار مجلد مصدر أو سحب وإفلات بعض الصور",
@@ -112,6 +117,7 @@ class I18n {
           errorSelectingDest: "خطأ في اختيار مجلد الوجهة: {error}",
           errorSelectingFiles: "خطأ في اختيار الملفات: {error}",
           processingFailed: "فشلت المعالجة",
+          processingCancelled: "تم إلغاء المعالجة من قبل المستخدم",
         },
         summary: {
           title: "📊 ملخص الضغط",

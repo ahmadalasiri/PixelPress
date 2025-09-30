@@ -20,10 +20,12 @@ const avgCompression = document.getElementById("avgCompression");
 const fileResults = document.getElementById("fileResults");
 const endBtn = document.getElementById("endBtn");
 const themeToggle = document.getElementById("themeToggle");
+const cancelBtn = document.getElementById("cancelBtn");
 
 // State
 let isProcessing = false;
 let selectedFiles = [];
+let processingCancelled = false;
 
 // Event listeners
 browseSrcBtn.addEventListener("click", async () => {
@@ -90,6 +92,7 @@ imageForm.addEventListener("submit", async (e) => {
 
 async function startProcessing() {
   isProcessing = true;
+  processingCancelled = false;
   updateProcessingState(true);
   hideStatusMessage();
   hideSummaryReport();
@@ -106,10 +109,19 @@ async function startProcessing() {
 
     // Set up progress listener
     window.electronAPI.onProcessingProgress((progress) => {
+      if (processingCancelled) {
+        return; // Don't update progress if cancelled
+      }
       updateProgress(progress);
     });
 
     const result = await window.electronAPI.processImages(options);
+
+    // Check if processing was cancelled
+    if (processingCancelled) {
+      showError(window.i18n.t("messages.processingCancelled"));
+      return;
+    }
 
     // Show success message
     showSuccess(
@@ -123,11 +135,16 @@ async function startProcessing() {
     showSummaryReport(result);
   } catch (error) {
     console.error("Processing error:", error);
-    showError(
-      window.i18n.t("messages.processingFailed", { error: error.message })
-    );
+    if (processingCancelled) {
+      showError(window.i18n.t("messages.processingCancelled"));
+    } else {
+      showError(
+        window.i18n.t("messages.processingFailed", { error: error.message })
+      );
+    }
   } finally {
     isProcessing = false;
+    processingCancelled = false;
     updateProcessingState(false);
     hideProgress();
 
@@ -142,9 +159,13 @@ function updateProcessingState(processing) {
   if (processing) {
     processBtn.classList.add("processing");
     processBtn.classList.remove("not-processing");
+    processBtn.style.display = "none";
+    cancelBtn.style.display = "block";
   } else {
     processBtn.classList.remove("processing");
     processBtn.classList.add("not-processing");
+    processBtn.style.display = "block";
+    cancelBtn.style.display = "none";
   }
 }
 
@@ -413,6 +434,14 @@ document.addEventListener("DOMContentLoaded", () => {
     clearAllFiles();
     sourceFolder.value = "";
     sourceFolder.classList.remove("selected");
+  });
+
+  // Cancel button functionality
+  cancelBtn.addEventListener("click", () => {
+    if (isProcessing) {
+      processingCancelled = true;
+      progressText.textContent = window.i18n.t("progress.cancelling");
+    }
   });
 
   // Language switcher functionality

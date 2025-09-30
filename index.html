@@ -213,7 +213,6 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 32px;
             position: relative;
             overflow: hidden;
         }
@@ -227,6 +226,30 @@
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .button-container {
+            margin-top: 32px;
+        }
+
+        .cancel-btn {
+            width: 100%;
+            padding: 16px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+
+        .cancel-btn:hover {
+            background: #c53030;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(229, 62, 62, 0.3);
         }
 
         .progress-container {
@@ -885,10 +908,15 @@
                 </div>
             </div>
 
-            <button type="submit" class="process-btn" id="processBtn">
-                <span class="spinner"></span>
-                <span class="btn-text" data-i18n="form.startProcessing">Start Processing</span>
-            </button>
+            <div class="button-container">
+                <button type="submit" class="process-btn" id="processBtn">
+                    <span class="spinner"></span>
+                    <span class="btn-text" data-i18n="form.startProcessing">Start Processing</span>
+                </button>
+                <button type="button" class="cancel-btn" id="cancelBtn" style="display: none;">
+                    <span data-i18n="form.cancelProcessing">Cancel Processing</span>
+                </button>
+            </div>
         </form>
 
         <div class="progress-container" id="progressContainer">

@@ -8,6 +8,7 @@ yarn-error.log*
 dist/
 build/
 out/
+z_test
 
 # Runtime data
 pids
