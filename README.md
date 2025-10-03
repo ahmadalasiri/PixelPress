@@ -2,12 +2,6 @@
 
 A powerful desktop application for batch image compression and format conversion built with Electron, Node.js, and Sharp.
 
-## 📥 Download
-
-### 🚀 **[⬇️ Download PixelPress v1.0.0 for Windows](https://github.com/ahmadalasiri/pixelpress/releases/download/v1.0.0/PixelPress-Setup-v1.0.0.exe)**
-
-_86.3 MB | Windows 10+ | Free & Open Source_
-
 **Quick Install:** Download → Run → Click "More info" → "Run anyway" → Follow installer
 
 **Alternative:** [View all releases](https://github.com/ahmadalasiri/pixelpress/releases) | [Download instructions](DOWNLOAD_INSTRUCTIONS.md)
