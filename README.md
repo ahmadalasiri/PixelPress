@@ -2,9 +2,7 @@
 
 A powerful desktop application for batch image compression and format conversion built with Electron, Node.js, and Sharp.
 
-**Quick Install:** Download → Run → Click "More info" → "Run anyway" → Follow installer
-
-**Alternative:** [View all releases](https://github.com/ahmadalasiri/pixelpress/releases) | [Download instructions](DOWNLOAD_INSTRUCTIONS.md)
+[View all releases](https://github.com/ahmadalasiri/pixelpress/releases) | [Download instructions](DOWNLOAD_INSTRUCTIONS.md)
 
 ![PixelPress Screenshot](assets/icon.png)
 
